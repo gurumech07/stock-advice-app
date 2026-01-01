@@ -126,6 +126,7 @@ def analyze_charts_html(symbol: str = "AAPL"):
     display_name = result.get('name') or symbol
     display_price = result.get('price')
     price_src = result.get('price_source')
+    rating = result.get('rating')
 
     html = f"""
     <!DOCTYPE html>
@@ -136,14 +137,16 @@ def analyze_charts_html(symbol: str = "AAPL"):
     </head>
     <body style="font-family: Arial; margin: 24px;">
         <h1>{display_name} ({symbol})</h1>
-        <h2>Price: {display_price} &nbsp;&nbsp; <small>source: {price_src}</small></h2>
+        <h2>Price: {display_price} &nbsp;&nbsp; <small>source: {price_src}</small>
+            &nbsp;&nbsp; <strong style="padding:6px 10px;border-radius:6px;background:#f0f0f0">Rating: {rating}</strong>
+        </h2>
         <p>{result.get('disclaimer')}</p>
 
         <h2>Fundamentals</h2>
         {fund_table}
 
         <h2>Model Summary</h2>
-        <p>Present: {model.get('present')} &nbsp; Top class: {model.get('top_class')} &nbsp; Score: {model.get('score')}</p>
+        <p>Present: {model.get('present')} &nbsp; Top class: {model.get('top_class')} &nbsp; Score: {model.get('score')} &nbsp; Rating: {rating}</p>
 
         {''.join(chart_divs)}
 
