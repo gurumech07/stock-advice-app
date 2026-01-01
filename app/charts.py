@@ -1,6 +1,11 @@
 """
 charts.py - Plotly chart generation for stock fundamental analysis.
 Serializes figures to JSON for FastAPI responses.
+Provides:
+- Metrics bar chart
+- Historical price trend chart
+- Financials pie chart
+- SHAP explainability chart (if model bundle available)             
 """
 
 import plotly.graph_objects as go
