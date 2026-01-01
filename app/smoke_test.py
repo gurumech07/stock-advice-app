@@ -1,11 +1,11 @@
 """Smoke test for finetuned model bundle and analysis flow.
 
 Run with:
-    python -m app.smoke_test
+    python -m app.smoke_test^
 
 This script will:
 - report whether `app/finetuned_model_bundle.pkl` exists
-- call `analyze_stock("AAPL")` and validate the response shape
+- call `analyze_stock("GOOG")` and validate the response shape
 """
 import sys
 from pathlib import Path
@@ -43,9 +43,9 @@ def main():
     else:
         print("No finetuned model bundle found. Proceeding with rules-based fallback.")
 
-    print("Calling analyze_stock('AAPL')...")
+    print("Calling analyze_stock('GOOG')...")
     try:
-        res = analyze_stock('IREN')
+        res = analyze_stock('GOOG')
     except Exception as e:
         print(f"analyze_stock raised an exception: {e}")
         sys.exit(2)

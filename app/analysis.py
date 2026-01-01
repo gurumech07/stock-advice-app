@@ -85,6 +85,8 @@ def analyze_stock(symbol: str):
     if info.get('earningsGrowth', 0) > 0.10: score += 25
 
     rating = "Buy" if score > 75 else "Hold" if score > 50 else "Sell"
+    # ensure model_error is always defined for the returned payload
+    model_error = None
 
     # If a fine-tuned model exists, use it to produce a data-driven score+rating
     if _FINETUNE_BUNDLE is not None:
@@ -324,7 +326,8 @@ def analyze_stock(symbol: str):
             'present': model_present,
             'probs': model_probs,
             'top_class': model_top_class,
-            'score': model_score
+            'score': model_score,
+            'error': model_error
         },
         "chart_stats": chart_stats,
         "charts": charts,
