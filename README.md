@@ -1,128 +1,123 @@
-Stock Advice App
+# Stock Advice App
+
 A FastAPI-based stock analysis application that performs fundamental analysis on user-provided ticker symbols. It fetches data using yfinance, computes key metrics (P/E, debt-to-equity, ROE, EPS growth), generates interactive Plotly charts, and provides a simple buy/sell/hold rating based on rules-based scoring.
 
-Tech Stack: Python (FastAPI, yfinance, pandas, plotly), Docker, Kubernetes (kind for local dev).
+**Tech Stack**: Python (FastAPI, yfinance, pandas, plotly), Docker, Kubernetes (kind for local dev).
 
-[ [
+[![Docker](https://img.shields.io/badge/Docker-Deployed-blue)](https://hub.docker.com/) [![Kubernetes](https://img.shields.io/badge/K8s-kind-green)](https://kind.sigs.k8s.io/)
 
-Features
-Input: POST /analyze with {"symbol": "AAPL"}
+## Features
 
-Output: Metrics, score (0-100), rating (Buy/Hold/Sell), Plotly chart JSON
+- Input: POST `/analyze` with `{"symbol": "AAPL"}`
+- Output: Metrics, score (0-100), rating (Buy/Hold/Sell), Plotly chart JSON
+- Local K8s deployment via kind
+- Educational demo for DevSecOps portfolios
 
-Local K8s deployment via kind
+## Quick Start
 
-Educational demo for DevSecOps portfolios
+### Prerequisites
+- Docker Desktop
+- kubectl
+- kind (`brew install kind` on macOS)
 
-Quick Start
-Prerequisites
-Docker Desktop
-
-kubectl
-
-kind (install: brew install kind)
-
-Local Development
-Clone & install:
-
-bash
-git clone <repo>
-cd stock-advice-app
-pip install -r app/requirements.txt
-uvicorn app.main:app --reload
-Test API:
+### Local Development
+1. Clone & install:
+   ```bash
+   git clone <repo-url>
+   cd stock-advice-app
+   pip install -r app/requirements.txt
+   uvicorn app.main:app --reload --port 8000
+Test:
 
 bash
-curl -X POST "http://localhost:8000/analyze" \
+curl -X POST "http://127.0.0.1:8000/analyze" \
   -H "Content-Type: application/json" \
   -d '{"symbol": "AAPL"}'
-Docker
+Docker Build & Run
 bash
 docker build -t stock-advice .
 docker run -p 8000:8000 stock-advice
-Kubernetes (kind)
+Kubernetes (kind Local Cluster)
 Create cluster:
 
 bash
-kind create cluster --config kind-config.yaml
+kind create cluster --config k8s/kind-config.yaml
 kind load docker-image stock-advice:latest
 Deploy:
 
 bash
 kubectl apply -f k8s/
-Access: http://localhost:8000/docs
+Access Swagger UI: http://localhost:8000/docs
 
 Project Structure
 text
 stock-advice-app/
-├── app/                 # FastAPI source
-│   ├── main.py
-│   ├── models.py
-│   ├── analysis.py      # yfinance logic + scoring
-│   └── charts.py
+├── app/
+│   ├── __init__.py
+│   ├── main.py          # FastAPI app
+│   ├── models.py        # Pydantic schemas
+│   ├── analysis.py      # yfinance + scoring logic
+│   └── charts.py        # Plotly generation
+├── requirements.txt
 ├── Dockerfile
-├── k8s/                 # Deployment manifests
-├── kind-config.yaml
+├── k8s/
+│   ├── deployment.yaml
+│   ├── service.yaml
+│   └── kind-config.yaml
+├── .dockerignore
+├── .gitignore
 └── README.md
-API Example Response
-json
-{
-  "score": 82,
-  "rating": "Buy",
-  "metrics": {"forwardPE": 12.5, "debtToEquity": 45, ...},
-  "chart": "<plotly json>",
-  "disclaimer": "Educational tool only. Not financial advice."
-}
-Fundamental Analysis Logic
-Data: yfinance (free, public Yahoo Finance API wrapper)
+Core Logic Example (analysis.py snippet)
+python
+import yfinance as yf
+import plotly.graph_objects as go
 
-Metrics: Forward P/E <15 (+25), Debt/Equity <50 (+25), ROE >15% (+25), EPS growth >10% (+25)
+def analyze_stock(symbol: str):
+    ticker = yf.Ticker(symbol)
+    info = ticker.info
+    score = 0
+    if info.get('forwardPE', 999) < 15: score += 25
+    if info.get('debtToEquity', 999) < 50: score += 25
+    if info.get('returnOnEquity', 0) > 0.15: score += 25
+    if info.get('earningsGrowth', 0) > 0.10: score += 25
+    rating = "Buy" if score > 75 else "Hold" if score > 50 else "Sell"
+    
+    # Sample Plotly chart
+    fig = go.Figure(data=[go.Bar(x=['P/E', 'D/E', 'ROE'], y=[info.get('forwardPE'), info.get('debtToEquity'), info.get('returnOnEquity')])])
+    return {"score": score, "rating": rating, "metrics": info, "chart": fig.to_json()}
+🚨 Critical Disclaimers (Required Reading)
+This project is for EDUCATIONAL and PORTFOLIO PURPOSES ONLY.
 
-Charts: Plotly bar/line for ratios/trends
+1. Not Investment Advice
+Ratings are simplistic algorithms, not professional analysis.
 
-Extend with scikit-learn for ML predictions
+Never trade based on this app alone. Seek advice from certified financial professionals.
 
-Deployment Notes
-Optimized for kind (multi-node config included)
+No guarantees on accuracy or performance.
 
-Scale: kubectl scale deployment/stock-advice --replicas=3
+2. Data Usage Restrictions
+Relies on yfinance (Yahoo Finance scraper).
 
-Prod: Use managed K8s (EKS/GKE), add HTTPS/Ingress
+Non-commercial, personal use only per Yahoo TOS. No redistribution or production apps.
+
+Data may be delayed/inaccurate.
+
+3. Risk Warning
+Investing involves loss risk. Past results ≠ future gains.
+
+Developers not liable for any financial harm.
+
+4. Regulatory Note (EU/DE Users)
+Not registered investment advice (MiFID II/BaFin non-compliant).
+
+Every API response includes: "disclaimer": "Educational only. Not advice."
 
 License
-MIT License – see LICENSE for details.
+MIT License. See LICENSE.
 
-🚨 IMPORTANT DISCLAIMERS
-This is an EDUCATIONAL DEMO PROJECT ONLY. Read before use:
+Contributing & Contact
+PRs for improvements (e.g., ML scoring, CI/CD) welcome. Issues for bugs.
 
-1. Not Financial Advice
-Analysis and ratings (buy/sell/hold) are automated, rules-based, and for learning purposes.
+Built by a DevSecOps engineer prepping for Docker roles. Questions? Open an issue.
 
-Do NOT base trades on this app. Past performance ≠ future results. Markets involve substantial risk of loss.
-
-Consult a licensed financial advisor. Developers assume no responsibility for financial decisions or losses.
-
-2. Data Source Limitations
-Uses yfinance (Yahoo Finance data).
-
-Personal, non-commercial use only. Yahoo TOS prohibits redistribution, commercial apps, or high-volume scraping.
-
-Data may be delayed, incomplete, or erroneous. No warranty on accuracy.
-
-3. No Liability
-Use at your own risk. No guarantees on uptime, security, or results.
-
-In EU/Germany: This is not MiFID II-compliant investment advice (per BaFin guidelines).
-
-4. Regulatory Compliance
-For demo/portfolio use (e.g., GitHub). Do not monetize or offer as a service without legal review.
-
-Add your own API keys/rate limiting for production data sources (e.g., Alpha Vantage, Polygon.io).
-
-By using this app, you agree to these terms.
-
-Contributing
-Fork, PRs welcome for features like ML models or cloud CI/CD (GitHub Actions).
-
-Acknowledgments
-Inspired by yfinance examples and FastAPI tutorials. Built for Docker/K8s showcase.
+Updated: January 2026
