@@ -1,4 +1,9 @@
 # app/main.py
+"""
++main.py - FastAPI application for stock analysis.
++Provides endpoints for stock analysis, chart rendering,
++and health checks. 
+"""                                
 from fastapi import FastAPI, HTTPException
 from fastapi.responses import HTMLResponse
 from pydantic import BaseModel
