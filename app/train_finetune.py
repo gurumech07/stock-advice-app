@@ -11,7 +11,7 @@ Usage:
 Outputs:
     - app/finetuned_model_bundle.pkl  (joblib dump with {'model', 'le', 'features'})
 
-This is a lightweight demo to enable a fine-tuned model inside the app.
+This is a lightweight demo to enable a fine-tuned model inside the app
 """
 from pathlib import Path
 from typing import List
