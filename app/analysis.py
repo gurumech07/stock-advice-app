@@ -1,4 +1,42 @@
 # app/analysis.py
+
+"""
+Broad overview
+---------------
+This module provides the core analysis entrypoints for the Stock Advice App.
+
+What it does
+- Fetches market data and metadata for a symbol via `yfinance`.
+- Computes a simple, interpretable fundamentals-based score and rating
+    (fallback logic so the API remains useful without a trained model).
+- Optionally loads a fine-tuned model bundle (joblib file at
+    `app/finetuned_model_bundle.pkl`) and computes price-derived features
+    to obtain a data-driven probability score and class. When available,
+    model outputs are merged with the baseline score to form the returned
+    `score`/`rating` and are also exposed under the `model` key.
+- Produces technical indicators (SMA, RSI, volatility, returns,
+    drawdown) and numeric chart diagnostics (`chart_stats`) for programmatic
+    validation of Close vs Adj Close, currency and scale mismatches.
+- Delegates Plotly chart generation to `generate_all_charts` from
+    `app.charts`, which may include SHAP explainability if a compatible
+    bundle and `shap` are available.
+
+Inputs & outputs
+- Input: stock symbol (e.g., "AAPL").
+- Output: a JSON-serializable dict with keys such as `symbol`, `name`,
+    `price`, `price_source`, `score`, `rating`, `metrics`, `fundamentals`,
+    `technical`, `analyst`, `model`, `chart_stats`, and `charts`.
+
+Notes & diagnostics
+- Bundle format (joblib dict): expected keys include `model`, `le`,
+    `features`, and optionally `background` and `scaler` for SHAP and
+    preprocessing.
+- The code is defensive: if the bundle is missing or inference fails,
+    the module falls back to the fundamentals-based logic and still
+    returns charts and diagnostics so callers can programmatically detect
+    issues (see `chart_stats.warning`).
+"""
+
 import yfinance as yf
 import pandas as pd
 from .charts import generate_all_charts
