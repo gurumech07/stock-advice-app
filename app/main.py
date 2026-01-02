@@ -1,9 +1,8 @@
 # app/main.py
+"""main.py - FastAPI application for stock analysis.
+Provides endpoints for stock analysis, chart rendering,
+and health checks.
 """
-+main.py - FastAPI application for stock analysis.
-+Provides endpoints for stock analysis, chart rendering,
-+and health checks. 
-"""                                
 from fastapi import FastAPI, HTTPException
 from fastapi.responses import HTMLResponse
 from pydantic import BaseModel
@@ -47,6 +46,8 @@ def charts_html(symbol: str = "AAPL"):
             f"const {div_id} = JSON.parse({json.dumps(chart_json)}); Plotly.newPlot('{div_id}', {div_id}.data, {div_id}.layout);"
         )
 
+    scripts_js = "\n".join(chart_scripts)
+
     html = f"""
     <!DOCTYPE html>
     <html>
@@ -59,11 +60,12 @@ def charts_html(symbol: str = "AAPL"):
         <p>{result.get('disclaimer')}</p>
         {''.join(chart_divs)}
         <script>
-            {"\n".join(chart_scripts)}
+            {scripts_js}
         </script>
     </body>
     </html>
     """
+    
     return HTMLResponse(content=html)
 
 
@@ -128,6 +130,8 @@ def analyze_charts_html(symbol: str = "AAPL"):
     price_src = result.get('price_source')
     rating = result.get('rating')
 
+    scripts_js = "\n".join(chart_scripts)
+
     html = f"""
     <!DOCTYPE html>
     <html>
@@ -151,7 +155,7 @@ def analyze_charts_html(symbol: str = "AAPL"):
         {''.join(chart_divs)}
 
         <script>
-            {"\n".join(chart_scripts)}
+            {scripts_js}
         </script>
     </body>
     </html>
